@@ -238,6 +238,10 @@
             animation: slideIn 0.5s forwards;
         }
         
+        .notification.error {
+            background-color: #e53935;
+        }
+        
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -246,6 +250,13 @@
             to {
                 transform: translateX(0);
                 opacity: 1;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .login-container {
+                width: 90%;
+                padding: 30px 20px;
             }
         }
     </style>
@@ -288,7 +299,25 @@
     
     <div class="notification" id="notification"></div>
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    
     <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfXUvCI0U4NT2bf7tLh5CdtUxwn6xOWHc",
+            authDomain: "cryptoz-3991c.firebaseapp.com",
+            projectId: "cryptoz-3991c",
+            storageBucket: "cryptoz-3991c.firebasestorage.app",
+            messagingSenderId: "594456340792",
+            appId: "1:594456340792:web:25d65fd0d3594f829879cd",
+            measurementId: "G-XTG2RHTSQ6"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Create falling leaves animation
             const bgAnimation = document.getElementById('bgAnimation');
@@ -334,21 +363,43 @@
             const forgotPasswordLink = document.getElementById('forgotPassword');
             const notification = document.getElementById('notification');
             
+            // Check if user is already logged in
+            auth.onAuthStateChanged(function(user) {
+                if (user) {
+                    // User is signed in, redirect to dashboard
+                    window.location.href = 'dashboard.html';
+                }
+            });
+            
             loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
                 
-                // Simple validation (in a real app, this would be server-side)
-                if (email && password) {
-                    showNotification('Login successful! Redirecting to dashboard...');
-                    
-                    // Redirect to dashboard after successful login
-                    setTimeout(function() {
-                        window.location.href = 'dashboard.html';
-                    }, 2000);
-                }
+                // Sign in with Firebase Authentication
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        // Signed in successfully
+                        showNotification('Login successful! Redirecting to dashboard...');
+                        
+                        // Redirect to dashboard after successful login
+                        setTimeout(function() {
+                            window.location.href = 'dashboard.html';
+                        }, 2000);
+                    })
+                    .catch((error) => {
+                        const errorCode = error.code;
+                        const errorMessage = error.message;
+                        
+                        if (errorCode === 'auth/user-not-found' || errorCode === 'auth/wrong-password') {
+                            showNotification('Invalid email or password. Please try again.', 'error');
+                        } else if (errorCode === 'auth/too-many-requests') {
+                            showNotification('Too many failed login attempts. Please try again later.', 'error');
+                        } else {
+                            showNotification(errorMessage, 'error');
+                        }
+                    });
             });
             
             forgotPasswordLink.addEventListener('click', function(e) {
@@ -357,19 +408,34 @@
                 const email = document.getElementById('email').value;
                 
                 if (email) {
-                    showNotification('Password reset link sent to your email!');
+                    // Send password reset email
+                    auth.sendPasswordResetEmail(email)
+                        .then(() => {
+                            showNotification('Password reset link sent to your email!');
+                        })
+                        .catch((error) => {
+                            const errorCode = error.code;
+                            const errorMessage = error.message;
+                            
+                            if (errorCode === 'auth/user-not-found') {
+                                showNotification('No account found with this email address.', 'error');
+                            } else {
+                                showNotification(errorMessage, 'error');
+                            }
+                        });
                 } else {
-                    showNotification('Please enter your email address first.');
+                    showNotification('Please enter your email address first.', 'error');
                 }
             });
             
-            function showNotification(message) {
+            function showNotification(message, type = 'success') {
                 notification.textContent = message;
+                notification.className = 'notification ' + type;
                 notification.style.display = 'block';
                 
                 setTimeout(function() {
                     notification.style.display = 'none';
-                }, 3000);
+                }, 5000);
             }
         });
     </script>
