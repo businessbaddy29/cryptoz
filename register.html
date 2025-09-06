@@ -392,7 +392,27 @@
     
     <div class="notification" id="notification"></div>
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    
     <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfXUvCI0U4NT2bf7tLh5CdtUxwn6xOWHc",
+            authDomain: "cryptoz-3991c.firebaseapp.com",
+            projectId: "cryptoz-3991c",
+            storageBucket: "cryptoz-3991c.firebasestorage.app",
+            messagingSenderId: "594456340792",
+            appId: "1:594456340792:web:25d65fd0d3594f829879cd",
+            measurementId: "G-XTG2RHTSQ6"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        
         document.addEventListener('DOMContentLoaded', function() {
             // Create falling leaves animation
             const bgAnimation = document.getElementById('bgAnimation');
@@ -482,31 +502,6 @@
                 return /^[a-zA-Z0-9]+$/.test(remainingChars);
             }
             
-            // Function to check if referral code exists in localStorage
-            function referralCodeExists(code) {
-                const users = JSON.parse(localStorage.getItem('cryptoz_users') || '[]');
-                return users.some(user => user.referralCode === code);
-            }
-            
-            // Function to save user to localStorage
-            function saveUser(userData) {
-                const users = JSON.parse(localStorage.getItem('cryptoz_users') || '[]');
-                
-                // If user was referred, add them to the referrer's team
-                if (userData.referredBy) {
-                    const referrerIndex = users.findIndex(user => user.referralCode === userData.referredBy);
-                    if (referrerIndex !== -1) {
-                        if (!users[referrerIndex].team) {
-                            users[referrerIndex].team = [];
-                        }
-                        users[referrerIndex].team.push(userData.id);
-                    }
-                }
-                
-                users.push(userData);
-                localStorage.setItem('cryptoz_users', JSON.stringify(users));
-            }
-            
             // Handle form submission
             registerForm.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -537,51 +532,73 @@
                     return;
                 }
                 
-                // Check if referral code exists
-                if (!referralCodeExists(referralCode)) {
-                    showNotification('Required a valid referral code', 'error');
-                    return;
-                }
-                
-                // Check if email already exists
-                const users = JSON.parse(localStorage.getItem('cryptoz_users') || '[]');
-                if (users.some(user => user.email === email)) {
-                    showNotification('An account with this email already exists.', 'error');
-                    return;
-                }
-                
-                // Generate new referral code for the user
-                const newReferralCode = 'cz' + generateRandomCode(6);
-                
-                // Create user object
-                const newUser = {
-                    id: Date.now(), // Simple ID generation for demo
-                    fullName,
-                    email,
-                    mobile,
-                    password, // In a real app, this would be hashed
-                    referralCode: newReferralCode,
-                    referredBy: referralCode,
-                    team: [],
-                    createdAt: new Date().toISOString()
-                };
-                
-                // Save user to localStorage
-                saveUser(newUser);
-                
-                // Show success message
-                showNotification('Account created successfully!', 'success');
-                
-                // Generate and show referral link
-                const referralLink = `https://businessbaddy29.github.io/cryptoz/register.html?ref=${newReferralCode}`;
-                referralLinkInput.value = referralLink;
-                referralLinkContainer.style.display = 'block';
-                
-                // Reset form
-                registerForm.reset();
-                
-                // Pre-fill referral code field with the new user's code for next registration
-                document.getElementById('referralCode').value = newReferralCode;
+                // Check if referral code exists in Firebase
+                database.ref('referralCodes/' + referralCode).once('value').then(function(snapshot) {
+                    if (!snapshot.exists()) {
+                        showNotification('Required a valid referral code', 'error');
+                        return;
+                    }
+                    
+                    // Create user with Firebase Authentication
+                    auth.createUserWithEmailAndPassword(email, password)
+                        .then((userCredential) => {
+                            // Signed in 
+                            const user = userCredential.user;
+                            
+                            // Generate new referral code for the user
+                            const newReferralCode = 'cz' + generateRandomCode(6);
+                            
+                            // Save user data to Firebase Database
+                            database.ref('users/' + user.uid).set({
+                                fullName,
+                                email,
+                                mobile,
+                                referralCode: newReferralCode,
+                                referredBy: referralCode,
+                                createdAt: new Date().toISOString()
+                            });
+                            
+                            // Add the new referral code to the database
+                            database.ref('referralCodes/' + newReferralCode).set({
+                                uid: user.uid,
+                                createdAt: new Date().toISOString()
+                            });
+                            
+                            // Update referrer's team
+                            const referrerData = snapshot.val();
+                            if (referrerData && referrerData.uid) {
+                                database.ref('users/' + referrerData.uid + '/team/' + user.uid).set(true);
+                            }
+                            
+                            // Show success message
+                            showNotification('Account created successfully!', 'success');
+                            
+                            // Generate and show referral link
+                            const referralLink = `${window.location.origin}/register.html?ref=${newReferralCode}`;
+                            referralLinkInput.value = referralLink;
+                            referralLinkContainer.style.display = 'block';
+                            
+                            // Reset form
+                            registerForm.reset();
+                            
+                            // Pre-fill referral code field with the new user's code for next registration
+                            document.getElementById('referralCode').value = newReferralCode;
+                        })
+                        .catch((error) => {
+                            const errorCode = error.code;
+                            const errorMessage = error.message;
+                            
+                            if (errorCode === 'auth/email-already-in-use') {
+                                showNotification('An account with this email already exists.', 'error');
+                            } else if (errorCode === 'auth/weak-password') {
+                                showNotification('Password is too weak. Please use a stronger password.', 'error');
+                            } else {
+                                showNotification(errorMessage, 'error');
+                            }
+                        });
+                }).catch((error) => {
+                    showNotification('Error validating referral code. Please try again.', 'error');
+                });
             });
             
             // Handle copy referral link button
