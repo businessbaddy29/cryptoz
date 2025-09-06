@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptoz - Advanced Crypto Trading Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7f0;
+            color: #2d5016;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, #2d5016 0%, #3e6b1f 100%);
+            color: #fff;
+            padding: 0;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: #8bc34a;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        
+        .logo i {
+            font-size: 32px;
+            margin-right: 10px;
+            color: #8bc34a;
+            transform: translateZ(20px);
+        }
+        
+        .logo span {
+            transform: translateZ(15px);
+        }
+        
+        /* Navigation Styles */
+        nav {
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            margin-right: 20px;
+        }
+        
+        .nav-item {
+            position: relative;
+            margin: 0 10px;
+        }
+        
+        .nav-link {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            transform-style: preserve-3d;
+            perspective: 500px;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(139, 195, 74, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav-link i {
+            margin-right: 5px;
+            transform: translateZ(10px);
+        }
+        
+        .nav-link span {
+            transform: translateZ(5px);
+        }
+        
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #fff;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .nav-item:hover .dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-item {
+            display: block;
+            padding: 12px 15px;
+            color: #2d5016;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f0f7e6;
+            color: #8bc34a;
+        }
+        
+        .login-btn {
+            background-color: #8bc34a;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+            perspective: 500px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .login-btn:hover {
+            background-color: #7cb342;
+            transform: translateY(-3px) translateZ(10px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .login-btn span {
+            transform: translateZ(5px);
+        }
+        
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 21px;
+            cursor: pointer;
+        }
+        
+        .menu-toggle span {
+            display: block;
+            height: 3px;
+            width: 100%;
+            background-color: #fff;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 100px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgxMzksIDE5NSwgNzQsIDAuMDUpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI3BhdHRlcm4pIi8+PC9zdmc+');
+            opacity: 0.5;
+            z-index: -1;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #2d5016;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        
+        .hero h1 span {
+            display: inline-block;
+            transform: translateZ(20px);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateZ(20px) translateY(0);
+            }
+            50% {
+                transform: translateZ(20px) translateY(-10px);
+            }
+        }
+        
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 30px;
+            color: #5a7a3e;
+            line-height: 1.6;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .cta-btn {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+            perspective: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .cta-btn span {
+            transform: translateZ(10px);
+        }
+        
+        .primary-btn {
+            background-color: #8bc34a;
+            color: #fff;
+        }
+        
+        .primary-btn:hover {
+            background-color: #7cb342;
+            transform: translateY(-5px) translateZ(15px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        
+        .secondary-btn {
+            background-color: #fff;
+            color: #2d5016;
+            border: 2px solid #8bc34a;
+        }
+        
+        .secondary-btn:hover {
+            background-color: #f0f7e6;
+            transform: translateY(-5px) translateZ(15px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 80px 30px;
+            background-color: #fff;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .section-title h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2d5016;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: #8bc34a;
+            border-radius: 2px;
+        }
+        
+        .section-title p {
+            font-size: 18px;
+            color: #5a7a3e;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background-color: #f5f7f0;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px) translateZ(20px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #8bc34a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            color: #fff;
+            transform: translateZ(20px);
+        }
+        
+        .feature-card h3 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2d5016;
+        }
+        
+        .feature-card p {
+            color: #5a7a3e;
+            line-height: 1.6;
+        }
+        
+        /* Platform Section */
+        .platform {
+            padding: 80px 30px;
+            background-color: #f0f7e6;
+        }
+        
+        .platform-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+        
+        .platform-text h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2d5016;
+            margin-bottom: 20px;
+        }
+        
+        .platform-text p {
+            font-size: 18px;
+            color: #5a7a3e;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .platform-features {
+            list-style: none;
+        }
+        
+        .platform-feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #2d5016;
+        }
+        
+        .platform-feature i {
+            color: #8bc34a;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        
+        .platform-image {
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        
+        .platform-image img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            transform: translateZ(30px);
+        }
+        
+        /* Education Section */
+        .education {
+            padding: 80px 30px;
+            background-color: #fff;
+        }
+        
+        .education-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .edu-card {
+            background-color: #f5f7f0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        
+        .edu-card:hover {
+            transform: translateY(-10px) translateZ(20px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        
+        .edu-card-image {
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .edu-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .edu-card:hover .edu-card-image img {
+            transform: scale(1.1);
+        }
+        
+        .edu-card-content {
+            padding: 25px;
+        }
+        
+        .edu-card h3 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2d5016;
+        }
+        
+        .edu-card p {
+            color: #5a7a3e;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .edu-link {
+            display: inline-block;
+            color: #8bc34a;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .edu-link:hover {
+            color: #7cb342;
+            text-decoration: underline;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #2d5016;
+            color: #fff;
+            padding: 70px 30px 20px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+        
+        .footer-column h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #8bc34a;
+            position: relative;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background-color: #8bc34a;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-links a {
+            color: #d7e0c9;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: #8bc34a;
+            padding-left: 5px;
+        }
+        
+        .contact-info {
+            list-style: none;
+        }
+        
+        .contact-info li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #d7e0c9;
+        }
+        
+        .contact-info i {
+            color: #8bc34a;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(139, 195, 74, 0.2);
+            color: #8bc34a;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background-color: #8bc34a;
+            color: #fff;
+            transform: translateY(-5px);
+        }
+        
+        .newsletter-form {
+            display: flex;
+            margin-top: 20px;
+        }
+        
+        .newsletter-form input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        
+        .newsletter-form input::placeholder {
+            color: #d7e0c9;
+        }
+        
+        .newsletter-form button {
+            padding: 12px 20px;
+            background-color: #8bc34a;
+            color: #fff;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .newsletter-form button:hover {
+            background-color: #7cb342;
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #d7e0c9;
+            font-size: 14px;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .platform-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .platform-image {
+                order: -1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+            
+            .menu-toggle {
+                display: flex;
+            }
+            
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .cta-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-coins"></i>
+                <span>Cryptoz</span>
+            </div>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Education</span>
+                        </a>
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-item">Beginner's Guide</a>
+                            <a href="#" class="dropdown-item">Trading Strategies</a>
+                            <a href="#" class="dropdown-item">Market Analysis</a>
+                            <a href="#" class="dropdown-item">Webinars</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Platform</span>
+                        </a>
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-item">Trading Dashboard</a>
+                            <a href="#" class="dropdown-item">Mobile App</a>
+                            <a href="#" class="dropdown-item">API Access</a>
+                            <a href="#" class="dropdown-item">Security</a>
+                        </div>
+                    </li>
+                </ul>
+                
+                <button class="login-btn">
+                    <span>Login</span>
+                </button>
+                
+                <div class="menu-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1><span>Advanced Crypto Trading</span> <span>Platform</span></h1>
+            <p>Experience the future of cryptocurrency trading with our cutting-edge platform designed for both beginners and professional traders.</p>
+            
+            <div class="cta-buttons">
+                <a href="#" class="cta-btn primary-btn">
+                    <span>Start Trading</span>
+                </a>
+                <a href="#" class="cta-btn secondary-btn">
+                    <span>Learn More</span>
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="features">
+        <div class="section-title">
+            <h2>Why Choose Cryptoz</h2>
+            <p>We provide the tools and resources you need to succeed in the dynamic world of cryptocurrency trading.</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Secure & Reliable</h3>
+                <p>Bank-level security protocols and multi-layer encryption to keep your assets safe at all times.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3>Lightning Fast</h3>
+                <p>Execute trades in milliseconds with our high-performance trading engine and global server network.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <h3>Advanced Analytics</h3>
+                <p>Comprehensive market analysis tools and real-time data to make informed trading decisions.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3>Mobile Trading</h3>
+                <p>Trade anytime, anywhere with our powerful mobile application available for iOS and Android.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Expert Support</h3>
+                <p>24/7 customer support from our team of crypto trading experts and community managers.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h3>Educational Resources</h3>
+                <p>Learn from the best with our comprehensive library of tutorials, webinars, and courses.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Platform Section -->
+    <section class="platform">
+        <div class="section-title">
+            <h2>Powerful Trading Platform</h2>
+            <p>Designed for traders at every level with intuitive features and advanced tools.</p>
+        </div>
+        
+        <div class="platform-content">
+            <div class="platform-text">
+                <h2>All-in-One Trading Solution</h2>
+                <p>Cryptoz offers a comprehensive trading platform that combines powerful technology with user-friendly design. Whether you're a beginner looking to make your first trade or an experienced trader seeking advanced tools, our platform has everything you need.</p>
+                
+                <ul class="platform-features">
+                    <li class="platform-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Real-time market data and price alerts</span>
+                    </li>
+                    <li class="platform-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Advanced charting and technical indicators</span>
+                    </li>
+                    <li class="platform-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Automated trading bots and strategies</span>
+                    </li>
+                    <li class="platform-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Portfolio tracking and performance analytics</span>
+                    </li>
+                    <li class="platform-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Low fees and competitive spreads</span>
+                    </li>
+                    <li class="platform-feature">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Secure wallet with multi-signature support</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="platform-image">
+                <img src="https://images.unsplash.com/photo-1639322537408-8bc1b8c3d8c5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Trading Platform">
+            </div>
+        </div>
+    </section>
+    
+    <!-- Education Section -->
+    <section class="education">
+        <div class="section-title">
+            <h2>Educational Resources</h2>
+            <p>Expand your knowledge and skills with our comprehensive educational materials.</p>
+        </div>
+        
+        <div class="education-cards">
+            <div class="edu-card">
+                <div class="edu-card-image">
+                    <img src="https://images.unsplash.com/photo-1633412802994-5c058f153b07?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Crypto Basics">
+                </div>
+                <div class="edu-card-content">
+                    <h3>Crypto Basics</h3>
+                    <p>Learn the fundamentals of cryptocurrency, blockchain technology, and how digital currencies work.</p>
+                    <a href="#" class="edu-link">Start Learning →</a>
+                </div>
+            </div>
+            
+            <div class="edu-card">
+                <div class="edu-card-image">
+                    <img src="https://images.unsplash.com/photo-1611974789855-9c2a0b623ac3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Trading Strategies">
+                </div>
+                <div class="edu-card-content">
+                    <h3>Trading Strategies</h3>
+                    <p>Master proven trading strategies and techniques to maximize your profits in any market condition.</p>
+                    <a href="#" class="edu-link">Explore Strategies →</a>
+                </div>
+            </div>
+            
+            <div class="edu-card">
+                <div class="edu-card-image">
+                    <img src="https://images.unsplash.com/photo-1639322537408-8bc1b8c3d8c5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Market Analysis">
+                </div>
+                <div class="edu-card-content">
+                    <h3>Market Analysis</h3>
+                    <p>Develop your analytical skills with our in-depth market analysis and research resources.</p>
+                    <a href="#" class="edu-link">Read Analysis →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>About Cryptoz</h3>
+                <p>Cryptoz is a leading cryptocurrency trading platform dedicated to providing secure, reliable, and user-friendly trading experiences for traders worldwide.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Services</a></li>
+                    <li><a href="#">Pricing</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Trading</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Bitcoin</a></li>
+                    <li><a href="#">Ethereum</a></li>
+                    <li><a href="#">Litecoin</a></li>
+                    <li><a href="#">Ripple</a></li>
+                    <li><a href="#">Cardano</a></li>
+                    <li><a href="#">Polkadot</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Contact Us</h3>
+                <ul class="contact-info">
+                    <li>
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>123 Crypto Street, Blockchain City, BC 10001</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-phone-alt"></i>
+                        <span>+1 (555) 123-4567</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-envelope"></i>
+                        <span>support@cryptoz.com</span>
+                    </li>
+                </ul>
+                
+                <div class="newsletter-form">
+                    <input type="email" placeholder="Your email address">
+                    <button>Subscribe</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2023 Cryptoz. All rights reserved. | <a href="#" style="color: #8bc34a;">Privacy Policy</a> | <a href="#" style="color: #8bc34a;">Terms of Service</a></p>
+        </div>
+    </footer>
+</body>
+</html>
