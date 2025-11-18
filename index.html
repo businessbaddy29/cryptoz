@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Logo Upload — Simple Preview</title>
+<style>
+  :root{
+    --bg:#f7f9fb;
+    --card:#ffffff;
+    --muted:#666;
+    --accent:#40E0D0;
+  }
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+       margin:0;background:var(--bg);color:#111;}
+  .wrap{max-width:900px;margin:32px auto;padding:20px;}
+  .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 20px rgba(20,20,40,0.06);}
+  header{display:flex;align-items:center;gap:14px}
+  .logo-box{width:120px;height:120px;border-radius:8px;border:1px dashed #ddd;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;}
+  .logo-box img{width:100%;height:100%;object-fit:contain;display:block;}
+  h1{margin:0;font-size:18px}
+  p.muted{color:var(--muted);margin:6px 0 0;font-size:13px}
+  .controls{margin-top:18px;display:grid;grid-template-columns:1fr 220px;gap:12px;align-items:start;}
+  .drop{
+    min-height:120px;border-radius:10px;border:2px dashed #e6e6e6;background:#fbfeff;padding:14px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;text-align:center;
+  }
+  .drop.dragover{border-color:var(--accent);box-shadow:0 6px 18px rgba(64,224,208,0.12);}
+  input[type=file]{display:none;}
+  .btn{display:inline-block;padding:10px 12px;border-radius:8px;background:var(--accent);color:#fff;text-decoration:none;font-weight:600;cursor:pointer;border:none;}
+  .small{padding:8px 10px;font-size:13px}
+  .meta{font-size:13px;color:var(--muted)}
+  .actions{display:flex;gap:8px;flex-direction:column}
+  .row{display:flex;gap:8px;align-items:center}
+  .save-note{font-size:12px;color:#999;margin-top:10px}
+  .footer{margin-top:18px;color:#777;font-size:13px}
+  @media(max-width:720px){
+    .controls{grid-template-columns:1fr; }
+    .actions{flex-direction:row;}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div class="logo-box" id="logoBox" title="Logo preview">
+          <!-- Will be filled by JS -->
+          <img id="logoImg" alt="logo preview" src="" />
+        </div>
+        <div>
+          <h1>Logo Upload & Preview</h1>
+          <p class="muted">logo.png / logo.jpeg / logo.jpg ko pehle check karega. Upload karke apni image set kar lo.</p>
+          <p class="muted">Preview small dikh raha hai — use top-left mein copy/paste karke web design mein use karo.</p>
+        </div>
+      </header>
+
+      <div class="controls">
+        <div>
+          <div id="dropZone" class="drop">
+            <div style="font-weight:700">Drag & Drop ya Click karein</div>
+            <div class="meta">PNG / JPG / JPEG (max 2 MB). Image yahan drop karo ya Upload button se choose karo.</div>
+            <input id="fileInput" type="file" accept="image/png,image/jpeg,image/jpg">
+            <div style="margin-top:10px">
+              <button id="chooseBtn" class="btn small">Upload Image</button>
+            </div>
+          </div>
+
+          <div class="save-note">
+            <label><input type="checkbox" id="persistCheckbox"> Browser mein save karen (localStorage)</label>
+          </div>
+
+          <div style="margin-top:12px" class="row">
+            <div class="meta">Max preview size:</div>
+            <select id="sizeSelect" style="padding:6px;border-radius:6px">
+              <option value="80">80 x 80</option>
+              <option value="100">100 x 100</option>
+              <option value="120" selected>120 x 120</option>
+              <option value="160">160 x 160</option>
+              <option value="200">200 x 200</option>
+            </select>
+            <div style="flex:1"></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <div>
+            <button id="useDefaultBtn" class="btn small" style="background:#2f7f77">Try local logo files</button>
+          </div>
+          <div>
+            <button id="downloadBtn" class="btn small" style="background:#3b6cff" disabled>Download Preview</button>
+          </div>
+          <div>
+            <button id="clearBtn" class="btn small" style="background:#d9534f">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <strong>Note:</strong> Agar aap project folder mein `logo.png`, `logo.jpeg`, ya `logo.jpg` rakhte ho to "Try local logo files" button pe click karo — browser first available file load karega. (Local files load karne ke liye same origin hona chahiye — agar file directly folder se open kar rahe ho kuch browsers CORS block kar sakte hain; upload method best hai.)
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const logoImg = document.getElementById('logoImg');
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const chooseBtn = document.getElementById('chooseBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const useDefaultBtn = document.getElementById('useDefaultBtn');
+  const persistCheckbox = document.getElementById('persistCheckbox');
+  const sizeSelect = document.getElementById('sizeSelect');
+
+  const STORAGE_KEY = 'simple_logo_preview_v1';
+
+  // Attempt to load local filenames (logo.png, logo.jpeg, logo.jpg) in order.
+  async function tryLocalFiles(){
+    const names = ['logo.png','logo.jpeg','logo.jpg'];
+    for(const name of names){
+      try{
+        // create an image to test load
+        await new Promise((resolve,reject)=>{
+          const test = new Image();
+          test.src = name + '?_=' + Date.now();
+          test.onload = ()=> resolve(true);
+          test.onerror = ()=> reject(false);
+        });
+        // if loaded, set to displayed img
+        setImageFromSrc(name);
+        return;
+      }catch(e){
+        // continue to next
+      }
+    }
+    alert('Local files nahi mile: logo.png / logo.jpeg / logo.jpg. Upload karke set kar sakte ho.');
+  }
+
+  function setImageFromSrc(src){
+    // For local filenames, src can be the filename string.
+    logoImg.src = src;
+    enableDownloadIfReady();
+    saveToStorageIfWanted();
+  }
+
+  function enableDownloadIfReady(){
+    downloadBtn.disabled = !logoImg.src;
+  }
+
+  function clearImage(){
+    logoImg.removeAttribute('src');
+    localStorage.removeItem(STORAGE_KEY);
+    persistCheckbox.checked = false;
+    enableDownloadIfReady();
+  }
+
+  function saveToStorageIfWanted(){
+    if(!persistCheckbox.checked) return;
+    // store current preview dataUrl
+    getPreviewDataUrl().then(dataUrl=>{
+      if(dataUrl) localStorage.setItem(STORAGE_KEY, dataUrl);
+    }).catch(()=>{});
+  }
+
+  async function getPreviewDataUrl(){
+    // Render the currently displayed image into a canvas with selected size and return dataURL
+    if(!logoImg.complete || !logoImg.src) return null;
+    const size = parseInt(sizeSelect.value,10) || 120;
+    const canvas = document.createElement('canvas');
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    // white background for non-transparent formats
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    // Draw image centered and preserving aspect
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    return new Promise((resolve,reject)=>{
+      img.onload = ()=>{
+        const iw = img.width, ih = img.height;
+        const scale = Math.min(canvas.width/iw, canvas.height/ih);
+        const nw = iw*scale, nh = ih*scale;
+        const x = (canvas.width - nw)/2;
+        const y = (canvas.height - nh)/2;
+        ctx.drawImage(img, x, y, nw, nh);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = ()=> resolve(null);
+      // if image src is a data URL or blob or same-origin file name it should load
+      img.src = logoImg.src;
+    });
+  }
+
+  // handle file input & drop
+  chooseBtn.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', e=>{
+    const f = e.target.files[0];
+    if(f) handleFile(f);
+    fileInput.value = '';
+  });
+
+  dropZone.addEventListener('click', ()=> fileInput.click());
+  dropZone.addEventListener('dragenter', e=>{ e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragover', e=>{ e.preventDefault(); });
+  dropZone.addEventListener('dragleave', e=>{ dropZone.classList.remove('dragover'); });
+  dropZone.addEventListener('drop', e=>{
+    e.preventDefault(); dropZone.classList.remove('dragover');
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if(f) handleFile(f);
+  });
+
+  async function handleFile(file){
+    const allowed = ['image/png','image/jpg','image/jpeg'];
+    if(!allowed.includes(file.type)){
+      alert('Sirf PNG/JPG/JPEG allowed.');
+      return;
+    }
+    if(file.size > 2 * 1024 * 1024){
+      if(!confirm('File 2MB se badi hai. Fir bhi continue karna hai?')) return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      logoImg.src = ev.target.result;
+      enableDownloadIfReady();
+      saveToStorageIfWanted();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // download button
+  downloadBtn.addEventListener('click', async ()=>{
+    const dataUrl = await getPreviewDataUrl();
+    if(!dataUrl){ alert('Preview ready nahi hai.'); return; }
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = 'logo-preview.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+
+  // clear
+  clearBtn.addEventListener('click', ()=>{
+    if(confirm('Preview clear karna hai?')) clearImage();
+  });
+
+  // try local files button
+  useDefaultBtn.addEventListener('click', tryLocalFiles);
+
+  // persist checkbox change
+  persistCheckbox.addEventListener('change', ()=>{
+    if(!persistCheckbox.checked) localStorage.removeItem(STORAGE_KEY);
+    else saveToStorageIfWanted();
+  });
+
+  // size change -> re-render / save
+  sizeSelect.addEventListener('change', ()=>{
+    // when size change, re-save if persist checked
+    saveToStorageIfWanted();
+  });
+
+  // load from storage on start
+  window.addEventListener('load', ()=>{
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if(saved){
+      logoImg.src = saved;
+      persistCheckbox.checked = true;
+      enableDownloadIfReady();
+    } else {
+      // try to show default placeholder text
+      logoImg.src = '';
+      // Attempt to load by trying filenames silently (don't alert)
+      const testNames = ['logo.png','logo.jpeg','logo.jpg'];
+      for(const n of testNames){
+        const img = new Image();
+        img.onload = ()=> {
+          // if no img displayed yet, set it
+          if(!logoImg.src) { logoImg.src = n; enableDownloadIfReady(); }
+        };
+        img.onerror = ()=>{};
+        img.src = n + '?_=' + Date.now();
+      }
+    }
+  });
+
+  // keyboard shortcut: press 'D' to download preview quickly
+  window.addEventListener('keydown', (e)=>{
+    if(e.key === 'd' || e.key === 'D'){
+      if(!downloadBtn.disabled) downloadBtn.click();
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
