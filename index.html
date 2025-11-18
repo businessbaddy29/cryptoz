@@ -3,295 +3,349 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Logo Upload — Simple Preview</title>
+<title>Dream Path — Logo Showcase</title>
 <style>
   :root{
-    --bg:#f7f9fb;
-    --card:#ffffff;
-    --muted:#666;
     --accent:#40E0D0;
+    --dark:#0b2540;
+    --muted:#667085;
+    --card:#fff;
+    --radius:12px;
   }
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
-       margin:0;background:var(--bg);color:#111;}
-  .wrap{max-width:900px;margin:32px auto;padding:20px;}
-  .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 20px rgba(20,20,40,0.06);}
-  header{display:flex;align-items:center;gap:14px}
-  .logo-box{width:120px;height:120px;border-radius:8px;border:1px dashed #ddd;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;}
-  .logo-box img{width:100%;height:100%;object-fit:contain;display:block;}
-  h1{margin:0;font-size:18px}
-  p.muted{color:var(--muted);margin:6px 0 0;font-size:13px}
-  .controls{margin-top:18px;display:grid;grid-template-columns:1fr 220px;gap:12px;align-items:start;}
-  .drop{
-    min-height:120px;border-radius:10px;border:2px dashed #e6e6e6;background:#fbfeff;padding:14px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;text-align:center;
-  }
-  .drop.dragover{border-color:var(--accent);box-shadow:0 6px 18px rgba(64,224,208,0.12);}
-  input[type=file]{display:none;}
-  .btn{display:inline-block;padding:10px 12px;border-radius:8px;background:var(--accent);color:#fff;text-decoration:none;font-weight:600;cursor:pointer;border:none;}
-  .small{padding:8px 10px;font-size:13px}
-  .meta{font-size:13px;color:var(--muted)}
-  .actions{display:flex;gap:8px;flex-direction:column}
-  .row{display:flex;gap:8px;align-items:center}
-  .save-note{font-size:12px;color:#999;margin-top:10px}
-  .footer{margin-top:18px;color:#777;font-size:13px}
-  @media(max-width:720px){
-    .controls{grid-template-columns:1fr; }
-    .actions{flex-direction:row;}
-  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;background:#f4f7fb;color:#111}
+  header{background:linear-gradient(90deg,var(--accent),#60f0d8);padding:12px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:20}
+  .brand{display:flex;align-items:center;gap:12px;color:var(--dark);font-weight:700}
+  .brand img{width:56px;height:56px;border-radius:8px;object-fit:contain;background:#fff;padding:6px;border:1px solid rgba(0,0,0,0.04)}
+  nav{margin-left:auto;display:flex;gap:10px;align-items:center}
+  nav button{background:transparent;border:0;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+  nav button.active{background:rgba(255,255,255,0.9);box-shadow:0 6px 18px rgba(16,24,40,0.08)}
+  .container{max-width:1100px;margin:28px auto;padding:0 18px}
+  .hero{display:grid;grid-template-columns:1fr 420px;gap:20px;align-items:center;margin-bottom:24px}
+  .hero .card{background:var(--card);padding:28px;border-radius:16px;box-shadow:0 8px 30px rgba(16,24,40,0.06)}
+  .hero h1{margin:0;font-size:28px;color:var(--dark)}
+  .hero p{color:var(--muted);margin:10px 0 18px}
+  .cta{display:flex;gap:10px}
+  .btn{background:var(--accent);border:0;color:#053;padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer}
+  .btn.ghost{background:transparent;border:2px solid rgba(5,37,36,0.08);color:var(--dark)}
+  .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:18px}
+  .product{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 6px 18px rgba(16,24,40,0.04);display:flex;flex-direction:column;gap:8px;align-items:center}
+  .product img{width:120px;height:120px;object-fit:contain;border-radius:8px;background:#fff;padding:8px}
+  .muted{color:var(--muted);font-size:13px}
+  footer{margin:36px 0;text-align:center;color:var(--muted)}
+  /* Logos page */
+  .logos-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .logo-slot{background:var(--card);padding:14px;border-radius:12px;display:flex;flex-direction:column;gap:10px;align-items:center;box-shadow:0 6px 18px rgba(16,24,40,0.04)}
+  .logo-preview{width:180px;height:120px;border-radius:8px;border:1px dashed #e9eef5;display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden}
+  .logo-preview img{width:100%;height:100%;object-fit:contain}
+  .file-row{display:flex;gap:8px;width:100%;align-items:center;justify-content:center}
+  .small{font-size:13px;padding:8px 10px;border-radius:8px;border:1px solid #eee;background:#fff;cursor:pointer}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  @media(max-width:820px){ .hero{grid-template-columns:1fr} .logos-grid{grid-template-columns:1fr} .brand img{width:48px;height:48px} }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <header>
-        <div class="logo-box" id="logoBox" title="Logo preview">
-          <!-- Will be filled by JS -->
-          <img id="logoImg" alt="logo preview" src="" />
-        </div>
-        <div>
-          <h1>Logo Upload & Preview</h1>
-          <p class="muted">logo.png / logo.jpeg / logo.jpg ko pehle check karega. Upload karke apni image set kar lo.</p>
-          <p class="muted">Preview small dikh raha hai — use top-left mein copy/paste karke web design mein use karo.</p>
-        </div>
-      </header>
-
-      <div class="controls">
-        <div>
-          <div id="dropZone" class="drop">
-            <div style="font-weight:700">Drag & Drop ya Click karein</div>
-            <div class="meta">PNG / JPG / JPEG (max 2 MB). Image yahan drop karo ya Upload button se choose karo.</div>
-            <input id="fileInput" type="file" accept="image/png,image/jpeg,image/jpg">
-            <div style="margin-top:10px">
-              <button id="chooseBtn" class="btn small">Upload Image</button>
-            </div>
-          </div>
-
-          <div class="save-note">
-            <label><input type="checkbox" id="persistCheckbox"> Browser mein save karen (localStorage)</label>
-          </div>
-
-          <div style="margin-top:12px" class="row">
-            <div class="meta">Max preview size:</div>
-            <select id="sizeSelect" style="padding:6px;border-radius:6px">
-              <option value="80">80 x 80</option>
-              <option value="100">100 x 100</option>
-              <option value="120" selected>120 x 120</option>
-              <option value="160">160 x 160</option>
-              <option value="200">200 x 200</option>
-            </select>
-            <div style="flex:1"></div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <div>
-            <button id="useDefaultBtn" class="btn small" style="background:#2f7f77">Try local logo files</button>
-          </div>
-          <div>
-            <button id="downloadBtn" class="btn small" style="background:#3b6cff" disabled>Download Preview</button>
-          </div>
-          <div>
-            <button id="clearBtn" class="btn small" style="background:#d9534f">Clear</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="footer">
-        <strong>Note:</strong> Agar aap project folder mein `logo.png`, `logo.jpeg`, ya `logo.jpg` rakhte ho to "Try local logo files" button pe click karo — browser first available file load karega. (Local files load karne ke liye same origin hona chahiye — agar file directly folder se open kar rahe ho kuch browsers CORS block kar sakte hain; upload method best hai.)
-      </div>
+<header>
+  <div class="brand">
+    <img id="siteLogo" alt="logo" src="" />
+    <div>
+      <div style="font-size:16px">Dream Path Global Services</div>
+      <div style="font-size:12px;color:rgba(11,37,64,0.6)">Simple e-shop demo — Logo showcase</div>
     </div>
   </div>
+  <nav>
+    <button id="navHome" class="active">Home</button>
+    <button id="navLogos">Logos</button>
+    <button id="navContact">Contact</button>
+  </nav>
+</header>
+
+<main class="container">
+  <!-- HOME / HERO -->
+  <section id="pageHome">
+    <div class="hero">
+      <div class="card">
+        <h1>Welcome to Dream Path — Small e-shop demo</h1>
+        <p class="muted">Yeh demo page aapko hero + products + ek dedicated logos page dikhata hai. Top-left logo automatically `logo.png` / `logo.jpeg` / `logo.jpg` check karega. Aap logos page se logo.jpeg & logo.jpg dekh / upload kar sakte ho.</p>
+        <div class="cta">
+          <button class="btn" onclick="navigate('logos')">See Logos</button>
+          <button class="btn ghost" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})">Learn more</button>
+        </div>
+
+        <div style="margin-top:18px">
+          <div class="muted">Featured products</div>
+          <div class="products" id="productsList">
+            <!-- sample products -->
+            <div class="product">
+              <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><rect width='100%' height='100%' fill='%23EEEEEE'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-size='20'>Sample</text></svg>" alt="">
+              <div style="font-weight:700">Premium Template</div>
+              <div class="muted">₹499</div>
+              <div style="margin-top:8px"><button class="small btn" onclick="alert('Add to cart placeholder')">Add</button></div>
+            </div>
+
+            <div class="product">
+              <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><rect width='100%' height='100%' fill='%23EEEEEE'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-size='20'>Logo Kit</text></svg>" alt="">
+              <div style="font-weight:700">Starter Logo Kit</div>
+              <div class="muted">₹199</div>
+              <div style="margin-top:8px"><button class="small btn" onclick="alert('Add to cart placeholder')">Add</button></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card" style="text-align:center">
+          <div style="font-weight:700;margin-bottom:10px">Quick Preview</div>
+          <div id="quickPreview" style="display:flex;flex-direction:column;gap:8px;align-items:center">
+            <div style="width:200px;height:110px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(16,24,40,0.04)">
+              <img id="quickImg" src="" alt="preview" style="max-width:180px;max-height:90px;object-fit:contain">
+            </div>
+            <div class="muted">Top-left site logo preview (auto tries local files).</div>
+            <div style="margin-top:6px">
+              <button class="small btn" onclick="loadSiteLogoDefaults()">Try local logo files</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOGOS page -->
+  <section id="pageLogos" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h2 style="margin:0">Logos — logo.jpeg & logo.jpg</h2>
+      <div class="muted">Upload to replace or click "Load local" to auto-check files in folder</div>
+    </div>
+
+    <div class="logos-grid">
+      <!-- Slot A: logo.jpeg -->
+      <div class="logo-slot">
+        <div style="font-weight:700">logo.jpeg</div>
+        <div class="logo-preview" id="slotA_preview" title="logo.jpeg preview">
+          <img id="slotA_img" src="" alt="logo.jpeg preview" />
+        </div>
+        <div class="muted" id="slotA_name">File: <span id="slotA_filename">—</span></div>
+
+        <div class="file-row">
+          <input type="file" id="slotA_file" accept="image/jpeg,image/jpg,image/png" style="display:none">
+          <button class="small" onclick="document.getElementById('slotA_file').click()">Upload logo.jpeg</button>
+          <button class="small" onclick="loadLocalSpecific('logo.jpeg')">Load local</button>
+          <button class="small" onclick="downloadSlot('A')" id="slotA_dl" disabled>Download</button>
+          <button class="small" onclick="clearSlot('A')">Clear</button>
+        </div>
+      </div>
+
+      <!-- Slot B: logo.jpg -->
+      <div class="logo-slot">
+        <div style="font-weight:700">logo.jpg</div>
+        <div class="logo-preview" id="slotB_preview" title="logo.jpg preview">
+          <img id="slotB_img" src="" alt="logo.jpg preview" />
+        </div>
+        <div class="muted" id="slotB_name">File: <span id="slotB_filename">—</span></div>
+
+        <div class="file-row">
+          <input type="file" id="slotB_file" accept="image/jpeg,image/jpg,image/png" style="display:none">
+          <button class="small" onclick="document.getElementById('slotB_file').click()">Upload logo.jpg</button>
+          <button class="small" onclick="loadLocalSpecific('logo.jpg')">Load local</button>
+          <button class="small" onclick="downloadSlot('B')" id="slotB_dl" disabled>Download</button>
+          <button class="small" onclick="clearSlot('B')">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;text-align:center" class="muted">Note: If you place `logo.jpeg` and/or `logo.jpg` in the same folder as this `index.html`, "Load local" will try to load them automatically. Some browsers block local file fetch when opening `file://` directly; prefer serving via `python -m http.server` if not loading.</div>
+  </section>
+
+  <!-- Contact -->
+  <section id="pageContact" style="display:none">
+    <div class="card" style="padding:20px">
+      <h2>Contact</h2>
+      <p class="muted">Dream Path Global Services — Contact: +91 9352066693</p>
+      <p class="muted">Website demo only. For production, integrate server uploads / CDN / access controls.</p>
+    </div>
+  </section>
+
+  <footer>© Dream Path Global Services</footer>
+</main>
 
 <script>
-(function(){
-  const logoImg = document.getElementById('logoImg');
-  const dropZone = document.getElementById('dropZone');
-  const fileInput = document.getElementById('fileInput');
-  const chooseBtn = document.getElementById('chooseBtn');
-  const downloadBtn = document.getElementById('downloadBtn');
-  const clearBtn = document.getElementById('clearBtn');
-  const useDefaultBtn = document.getElementById('useDefaultBtn');
-  const persistCheckbox = document.getElementById('persistCheckbox');
-  const sizeSelect = document.getElementById('sizeSelect');
+/* ========= Navigation ========== */
+const navHome = document.getElementById('navHome');
+const navLogos = document.getElementById('navLogos');
+const navContact = document.getElementById('navContact');
 
-  const STORAGE_KEY = 'simple_logo_preview_v1';
+function showPage(id){
+  document.getElementById('pageHome').style.display = id==='home'? 'block':'none';
+  document.getElementById('pageLogos').style.display = id==='logos'? 'block':'none';
+  document.getElementById('pageContact').style.display = id==='contact'? 'block':'none';
+  navHome.classList.toggle('active', id==='home');
+  navLogos.classList.toggle('active', id==='logos');
+  navContact.classList.toggle('active', id==='contact');
+  if(id==='logos'){ tryLoadBothLocal(); }
+}
+navHome.addEventListener('click', ()=> showPage('home'));
+navLogos.addEventListener('click', ()=> showPage('logos'));
+navContact.addEventListener('click', ()=> showPage('contact'));
 
-  // Attempt to load local filenames (logo.png, logo.jpeg, logo.jpg) in order.
-  async function tryLocalFiles(){
-    const names = ['logo.png','logo.jpeg','logo.jpg'];
-    for(const name of names){
-      try{
-        // create an image to test load
-        await new Promise((resolve,reject)=>{
-          const test = new Image();
-          test.src = name + '?_=' + Date.now();
-          test.onload = ()=> resolve(true);
-          test.onerror = ()=> reject(false);
-        });
-        // if loaded, set to displayed img
-        setImageFromSrc(name);
-        return;
-      }catch(e){
-        // continue to next
-      }
-    }
-    alert('Local files nahi mile: logo.png / logo.jpeg / logo.jpg. Upload karke set kar sakte ho.');
-  }
+function navigate(name){
+  if(name==='logos') showPage('logos');
+  else if(name==='home') showPage('home');
+  else if(name==='contact') showPage('contact');
+}
 
-  function setImageFromSrc(src){
-    // For local filenames, src can be the filename string.
-    logoImg.src = src;
-    enableDownloadIfReady();
-    saveToStorageIfWanted();
-  }
-
-  function enableDownloadIfReady(){
-    downloadBtn.disabled = !logoImg.src;
-  }
-
-  function clearImage(){
-    logoImg.removeAttribute('src');
-    localStorage.removeItem(STORAGE_KEY);
-    persistCheckbox.checked = false;
-    enableDownloadIfReady();
-  }
-
-  function saveToStorageIfWanted(){
-    if(!persistCheckbox.checked) return;
-    // store current preview dataUrl
-    getPreviewDataUrl().then(dataUrl=>{
-      if(dataUrl) localStorage.setItem(STORAGE_KEY, dataUrl);
-    }).catch(()=>{});
-  }
-
-  async function getPreviewDataUrl(){
-    // Render the currently displayed image into a canvas with selected size and return dataURL
-    if(!logoImg.complete || !logoImg.src) return null;
-    const size = parseInt(sizeSelect.value,10) || 120;
-    const canvas = document.createElement('canvas');
-    canvas.width = size; canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    // white background for non-transparent formats
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    // Draw image centered and preserving aspect
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    return new Promise((resolve,reject)=>{
-      img.onload = ()=>{
-        const iw = img.width, ih = img.height;
-        const scale = Math.min(canvas.width/iw, canvas.height/ih);
-        const nw = iw*scale, nh = ih*scale;
-        const x = (canvas.width - nw)/2;
-        const y = (canvas.height - nh)/2;
-        ctx.drawImage(img, x, y, nw, nh);
-        resolve(canvas.toDataURL('image/png'));
-      };
-      img.onerror = ()=> resolve(null);
-      // if image src is a data URL or blob or same-origin file name it should load
-      img.src = logoImg.src;
-    });
-  }
-
-  // handle file input & drop
-  chooseBtn.addEventListener('click', ()=> fileInput.click());
-  fileInput.addEventListener('change', e=>{
-    const f = e.target.files[0];
-    if(f) handleFile(f);
-    fileInput.value = '';
-  });
-
-  dropZone.addEventListener('click', ()=> fileInput.click());
-  dropZone.addEventListener('dragenter', e=>{ e.preventDefault(); dropZone.classList.add('dragover'); });
-  dropZone.addEventListener('dragover', e=>{ e.preventDefault(); });
-  dropZone.addEventListener('dragleave', e=>{ dropZone.classList.remove('dragover'); });
-  dropZone.addEventListener('drop', e=>{
-    e.preventDefault(); dropZone.classList.remove('dragover');
-    const f = e.dataTransfer.files && e.dataTransfer.files[0];
-    if(f) handleFile(f);
-  });
-
-  async function handleFile(file){
-    const allowed = ['image/png','image/jpg','image/jpeg'];
-    if(!allowed.includes(file.type)){
-      alert('Sirf PNG/JPG/JPEG allowed.');
+/* ========= Site logo auto-load ========== */
+const siteLogo = document.getElementById('siteLogo');
+const quickImg = document.getElementById('quickImg');
+async function trySiteLogoFiles(){
+  const names = ['logo.png','logo.jpeg','logo.jpg'];
+  for(const n of names){
+    try {
+      await imageLoads(n);
+      siteLogo.src = n;
+      quickImg.src = n;
       return;
-    }
-    if(file.size > 2 * 1024 * 1024){
-      if(!confirm('File 2MB se badi hai. Fir bhi continue karna hai?')) return;
-    }
-    const reader = new FileReader();
-    reader.onload = function(ev){
-      logoImg.src = ev.target.result;
-      enableDownloadIfReady();
-      saveToStorageIfWanted();
-    };
-    reader.readAsDataURL(file);
+    } catch(e){}
   }
-
-  // download button
-  downloadBtn.addEventListener('click', async ()=>{
-    const dataUrl = await getPreviewDataUrl();
-    if(!dataUrl){ alert('Preview ready nahi hai.'); return; }
-    const a = document.createElement('a');
-    a.href = dataUrl;
-    a.download = 'logo-preview.png';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+  // fallback placeholder
+  siteLogo.src = placeholderSVG(56,56,'DP');
+  quickImg.src = placeholderSVG(180,90,'DP');
+}
+function loadSiteLogoDefaults(){ trySiteLogoFiles(); }
+function imageLoads(src){
+  return new Promise((resolve,reject)=>{
+    const img = new Image();
+    img.onload = ()=> resolve(true);
+    img.onerror = ()=> reject(false);
+    img.src = src + '?_=' + Date.now();
   });
+}
+function placeholderSVG(w,h,text){
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'><rect rx='8' width='100%' height='100%' fill='%23ffffff'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23333' font-size='${Math.floor(w/3)}'>${text}</text></svg>`;
+  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+}
 
-  // clear
-  clearBtn.addEventListener('click', ()=>{
-    if(confirm('Preview clear karna hai?')) clearImage();
+/* ========= Logo slots: load from local filenames OR localStorage OR upload ========== */
+const slotA_img = document.getElementById('slotA_img');
+const slotB_img = document.getElementById('slotB_img');
+const slotA_file = document.getElementById('slotA_file');
+const slotB_file = document.getElementById('slotB_file');
+const slotA_name = document.getElementById('slotA_filename');
+const slotB_name = document.getElementById('slotB_filename');
+const slotA_dl = document.getElementById('slotA_dl');
+const slotB_dl = document.getElementById('slotB_dl');
+
+const STORAGE_A = 'dp_logo_slotA_v1'; // slot A -> logo.jpeg
+const STORAGE_B = 'dp_logo_slotB_v1'; // slot B -> logo.jpg
+
+// on load: try localStorage first, else try local files for both
+window.addEventListener('load', ()=>{
+  // site logo
+  trySiteLogoFiles();
+
+  const a = localStorage.getItem(STORAGE_A);
+  const b = localStorage.getItem(STORAGE_B);
+  if(a){ setSlot('A', a, 'logo.jpeg (saved)'); }
+  if(b){ setSlot('B', b, 'logo.jpg (saved)'); }
+  // if not saved, try local files when user navigates to logos
+});
+
+// uploads
+slotA_file.addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if(f) fileToDataUrl(f).then(d=>{
+    setSlot('A', d, f.name, true);
   });
-
-  // try local files button
-  useDefaultBtn.addEventListener('click', tryLocalFiles);
-
-  // persist checkbox change
-  persistCheckbox.addEventListener('change', ()=>{
-    if(!persistCheckbox.checked) localStorage.removeItem(STORAGE_KEY);
-    else saveToStorageIfWanted();
+  slotA_file.value = '';
+});
+slotB_file.addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if(f) fileToDataUrl(f).then(d=>{
+    setSlot('B', d, f.name, true);
   });
+  slotB_file.value = '';
+});
 
-  // size change -> re-render / save
-  sizeSelect.addEventListener('change', ()=>{
-    // when size change, re-save if persist checked
-    saveToStorageIfWanted();
+function fileToDataUrl(file){
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = ()=> res(r.result);
+    r.onerror = ()=> rej();
+    r.readAsDataURL(file);
   });
+}
 
-  // load from storage on start
-  window.addEventListener('load', ()=>{
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if(saved){
-      logoImg.src = saved;
-      persistCheckbox.checked = true;
-      enableDownloadIfReady();
+function setSlot(slot, dataUrlOrSrc, filename='uploaded', persist=false){
+  if(slot==='A'){
+    slotA_img.src = dataUrlOrSrc;
+    slotA_name.textContent = filename;
+    slotA_dl.disabled = false;
+    if(persist) localStorage.setItem(STORAGE_A, dataUrlOrSrc);
+  } else {
+    slotB_img.src = dataUrlOrSrc;
+    slotB_name.textContent = filename;
+    slotB_dl.disabled = false;
+    if(persist) localStorage.setItem(STORAGE_B, dataUrlOrSrc);
+  }
+  // also update quick preview for site logo if empty
+  if(!siteLogo.src || siteLogo.src.startsWith('data:')===false) {
+    // do not override local site logo if present
+  }
+}
+
+function clearSlot(slot){
+  if(!confirm('Clear this slot?')) return;
+  if(slot==='A'){
+    slotA_img.src = '';
+    slotA_name.textContent = '—';
+    slotA_dl.disabled = true;
+    localStorage.removeItem(STORAGE_A);
+  } else {
+    slotB_img.src = '';
+    slotB_name.textContent = '—';
+    slotB_dl.disabled = true;
+    localStorage.removeItem(STORAGE_B);
+  }
+}
+
+function downloadSlot(slot){
+  const imgEl = slot==='A'? slotA_img : slotB_img;
+  if(!imgEl.src){ alert('No image to download'); return; }
+  const a = document.createElement('a');
+  a.href = imgEl.src;
+  a.download = slot==='A'? 'logo.jpeg' : 'logo.jpg';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+/* Try load local specific file name (logo.jpeg / logo.jpg) */
+function loadLocalSpecific(filename){
+  imageLoads(filename).then(()=>{
+    // set as src (use raw filename)
+    if(filename.toLowerCase().endsWith('jpeg')) {
+      setSlot('A', filename, filename, false);
     } else {
-      // try to show default placeholder text
-      logoImg.src = '';
-      // Attempt to load by trying filenames silently (don't alert)
-      const testNames = ['logo.png','logo.jpeg','logo.jpg'];
-      for(const n of testNames){
-        const img = new Image();
-        img.onload = ()=> {
-          // if no img displayed yet, set it
-          if(!logoImg.src) { logoImg.src = n; enableDownloadIfReady(); }
-        };
-        img.onerror = ()=>{};
-        img.src = n + '?_=' + Date.now();
-      }
+      setSlot('B', filename, filename, false);
     }
-  });
+  }).catch(()=> alert(filename + ' not found in site folder.'));
+}
 
-  // keyboard shortcut: press 'D' to download preview quickly
-  window.addEventListener('keydown', (e)=>{
-    if(e.key === 'd' || e.key === 'D'){
-      if(!downloadBtn.disabled) downloadBtn.click();
-    }
-  });
+/* Try both local files when opening logos page */
+function tryLoadBothLocal(){
+  // try logo.jpeg -> slotA
+  imageLoads('logo.jpeg').then(()=> setSlot('A','logo.jpeg','logo.jpeg', false)).catch(()=>{});
+  imageLoads('logo.jpg').then(()=> setSlot('B','logo.jpg','logo.jpg', false)).catch(()=>{});
+}
 
-})();
+/* small util to load logos page on first nav if present */
+function tryLoadBothLocalOnStart(){ tryLoadBothLocal(); }
+tryLoadBothLocalOnStart();
+
+/* helper: navigate to logos if URL hash or on click */
+if(location.hash==='#logos') showPage('logos');
+
+/* End */
 </script>
 </body>
 </html>
